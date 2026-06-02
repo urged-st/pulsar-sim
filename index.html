@@ -27,6 +27,19 @@ let pulsarAngle = 0;
 
 let stars = [];
 
+let cameraX = 0
+let cameraY = 0;
+let zoomLevel = 1;
+
+let draggingView = false;
+let draggingEarth = false;
+
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+let earthX = 600;
+let earthY = -150;
+
 let speedSlider;
 let beamSlider;
 
@@ -37,11 +50,11 @@ function setup()
     createCanvas(windowWidth, windowHeight);
 
     //create stars
-    for(let i = 0; i < 300; i++)
+    for (let i = 0; i < 20000; i++)
     {
         stars.push({
-            x: random(width),
-            y: random(height),
+            x: random(-10000, 10000),
+            y: random(-10000, 10000),
             size: random(1,3)
         });
     }
@@ -71,14 +84,52 @@ function draw()
 {
     background(0);
 
+    if(draggingView)
+    {
+        cameraX -=
+            (mouseX - lastMouseX) /
+            zoomLevel;
+
+        cameraY -=
+            (mouseY - lastMouseY) /
+            zoomLevel;
+
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+    }
+    else if(draggingEarth)
+    {
+        earthX +=
+            (mouseX - lastMouseX) /
+            zoomLevel;
+
+        earthY +=
+            (mouseY - lastMouseY) /
+            zoomLevel;
+
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;    
+    }
+
+    push();
+    
+    translate(
+        width / 2,
+        height / 2
+    );
+
+    scale(zoomLevel);
+
+    translate(
+        -cameraX,
+        -cameraY            
+    );
+
     let rotationSpeed = speedSlider.value();
     let beamWidth = beamSlider.value();
 
-    let pulsarX = width * 0.42;
-    let pulsarY = height * 0.5;
-
-    let earthX = width * 0.82;
-    let earthY = height * 0.32;
+    let pulsarX = 0;
+    let pulsarY = 0;
 
     pulsarAngle += rotationSpeed;
 
@@ -252,6 +303,8 @@ function draw()
         earthY + 5
     );
 
+    pop();
+
     //status
     textSize(26);
 
@@ -360,6 +413,63 @@ function windowResized()
         windowWidth,
         windowHeight
     );
+}
+
+function mousePressed()
+{
+    let earthScreenX = 
+        width / 2 +
+        (earthX - cameraX) * zoomLevel;
+    let earthScreenY = 
+        height / 2 + (earthY - cameraY) * zoomLevel;
+
+    if(
+        dist(
+            mouseX,
+            mouseY,
+            earthScreenX,
+            earthScreenY
+        ) < 20
+    )
+
+    {
+        draggingEarth = true;}
+    
+
+    else
+    {
+        draggingView = true;
+    
+    }
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+}
+
+function mouseReleased()
+{
+    draggingView = false;
+    draggingEarth = false;
+}
+
+function mouseWheel(event)
+{
+    if(event.delta > 0)
+    {
+        zoomLevel *= 0.9;
+    }
+    else
+    {
+        zoomLevel *= 1.1;
+    }
+
+    zoomLevel =
+        constrain(
+            zoomLevel,
+            0.2,
+            10
+        );
+
+    return false;
 }
 
 </script>
