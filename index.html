@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pulsar Simulator</title>
+
+<script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/p5.min.js"></script>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family:Arial,sans-serif;
+}
+
+canvas{
+    display:block;
+}
+</style>
+</head>
+<body>
+
+<script>
+
+let pulsarAngle = 0;
+
+let stars = [];
+
+let speedSlider;
+let beamSlider;
+
+let history = [];
+
+function setup()
+{
+    createCanvas(windowWidth, windowHeight);
+
+    //create stars
+    for(let i = 0; i < 300; i++)
+    {
+        stars.push({
+            x: random(width),
+            y: random(height),
+            size: random(1,3)
+        });
+    }
+
+    //spin speed
+    speedSlider = createSlider(
+        0.005,
+        0.1,
+        0.02,
+        0.001
+    );
+
+    speedSlider.position(20, 20);
+
+    //beam width
+    beamSlider = createSlider(
+        0.05,
+        0.5,
+        0.15,
+        0.01
+    );
+
+    beamSlider.position(20, 55);
+}
+
+function draw()
+{
+    background(0);
+
+    let rotationSpeed = speedSlider.value();
+    let beamWidth = beamSlider.value();
+
+    let pulsarX = width * 0.42;
+    let pulsarY = height * 0.5;
+
+    let earthX = width * 0.82;
+    let earthY = height * 0.32;
+
+    pulsarAngle += rotationSpeed;
+
+    //draw stars
+    stroke(255);
+
+    for(let star of stars)
+    {
+        strokeWeight(star.size);
+        point(star.x, star.y);
+    }
+
+    //rotation axis
+    stroke(180);
+    strokeWeight(2);
+
+    line(
+        pulsarX,
+        pulsarY - 130,
+        pulsarX,
+        pulsarY + 130
+    );
+
+    let observerAngle =
+        atan2(
+            earthY - pulsarY,
+            earthX - pulsarX
+        );
+
+    let diff1 =
+        abs(
+            atan2(
+                sin(pulsarAngle - observerAngle),
+                cos(pulsarAngle - observerAngle)
+            )
+        );
+
+    let diff2 =
+        abs(
+            atan2(
+                sin(
+                    pulsarAngle + PI -
+                    observerAngle
+                ),
+                cos(
+                    pulsarAngle + PI -
+                    observerAngle
+                )
+            )
+        );
+
+    let signalStrength =
+        max(
+            exp(
+                -(diff1 * diff1) /
+                (2 * beamWidth * beamWidth)
+            ),
+            exp(
+                -(diff2 * diff2) /
+                (2 * beamWidth * beamWidth)
+            )
+        );
+
+    history.push(signalStrength);
+
+    if(history.length > 500)
+    {
+        history.shift();
+    }
+
+    push();
+
+    translate(
+        pulsarX,
+        pulsarY
+    );
+
+    rotate(pulsarAngle);
+
+    //magnetic axis
+    stroke(100,200,255);
+    strokeWeight(3);
+
+    line(0,-90,0,90);
+
+    noStroke();
+
+    //beam 1
+    fill(100,200,255,45);
+
+    arc(
+        0,
+        0,
+        1800,
+        1800,
+        -beamWidth,
+        beamWidth,
+        PIE
+    );
+
+    //beam 2
+    arc(
+        0,
+        0,
+        1800,
+        1800,
+        PI - beamWidth,
+        PI + beamWidth,
+        PIE
+    );
+
+    pop();
+
+    //observer line
+    stroke(80);
+
+    line(
+        pulsarX,
+        pulsarY,
+        earthX,
+        earthY
+    );
+
+    //pulsar glow
+    noStroke();
+
+    for(let r = 90; r > 0; r -= 5)
+    {
+        fill(
+            120,
+            180,
+            255,
+            7
+        );
+
+        circle(
+            pulsarX,
+            pulsarY,
+            r
+        );
+    }
+
+    //pulsar body
+    fill(200,230,255);
+
+    circle(
+        pulsarX,
+        pulsarY,
+        34
+    );
+
+    //earth glow
+    fill(
+        255,
+        100 + signalStrength * 155,
+        100
+    );
+
+    circle(
+        earthX,
+        earthY,
+        18
+    );
+
+    fill(255);
+    textSize(16);
+
+    text(
+        "Earth",
+        earthX + 15,
+        earthY + 5
+    );
+
+    //status
+    textSize(26);
+
+    if(signalStrength > 0.2)
+    {
+        fill(0,255,120);
+
+        text(
+            "SIGNAL DETECTED",
+            20,
+            110
+        );
+    }
+    else
+    {
+        fill(255,80,80);
+
+        text(
+            "NO SIGNAL",
+            20,
+            110
+        );
+    }
+
+    fill(255);
+
+    textSize(14);
+
+    text(
+        "spin rate",
+        170,
+        33
+    );
+
+    text(
+        "beam width",
+        170,
+        68
+    );
+
+    text(
+        "signal: " +
+        nf(signalStrength,1,3),
+        20,
+        140
+    );
+
+    //graph
+    let graphX = 20;
+    let graphY = height - 200;
+    let graphW = 650;
+    let graphH = 150;
+
+    noFill();
+
+    stroke(255);
+
+    rect(
+        graphX,
+        graphY,
+        graphW,
+        graphH
+    );
+
+    beginShape();
+
+    for(let i = 0; i < history.length; i++)
+    {
+        let x =
+            map(
+                i,
+                0,
+                history.length - 1,
+                graphX,
+                graphX + graphW
+            );
+
+        let y =
+            map(
+                history[i],
+                0,
+                1,
+                graphY + graphH,
+                graphY
+            );
+
+        vertex(x,y);
+    }
+
+    endShape();
+
+    noStroke();
+
+    fill(255);
+
+    text(
+        "received signal strength",
+        graphX,
+        graphY - 10
+    );
+}
+
+function windowResized()
+{
+    resizeCanvas(
+        windowWidth,
+        windowHeight
+    );
+}
+
+</script>
+
+</body>
+</html>
