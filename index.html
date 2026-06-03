@@ -23,6 +23,8 @@ canvas{
 
 <script>
 
+let presetSelect;
+
 let pulsarAngle = 0;
 
 let stars = [];
@@ -78,6 +80,21 @@ function setup()
     );
 
     beamSlider.position(20, 55);
+
+    presetSelect = createSelect();
+    presetSelect.position(20, 125);
+    presetSelect.option("Custom");
+    presetSelect.option("Slow Pulsar");
+    presetSelect.option("Typical Pulsar");
+    presetSelect.option("Fast Pulsar");
+    presetSelect.option("Millisecond Pulsar");
+
+    presetSelect.selected("Typical Pulsar");
+
+    presetSelect.changed(applyPreset);
+
+
+    applyPreset();
 }
 
 function draw()
@@ -377,6 +394,14 @@ function draw()
             20,
             165
         );
+
+    text(
+        "preset: " +
+        presetSelect.value(),
+        20,
+        215
+    );
+        
     //graph
     let graphX = 20;
     let graphY = height - 200;
@@ -440,14 +465,42 @@ function windowResized()
     );
 }
 
+
+function applyPreset()
+{
+    let preset = presetSelect.value();
+
+    if(preset === "Slow Pulsar")
+    {
+        speedSlider.value(0.008);
+        beamSlider.value(0.25);
+    }
+    else if(preset === "Typical Pulsar")
+    {
+        speedSlider.value(0.02);
+        beamSlider.value(0.15);
+    }
+    else if(preset === "Fast Pulsar")
+    {
+        speedSlider.value(0.05);
+        beamSlider.value(0.1);
+    }
+    else if(preset === "Millisecond Pulsar")
+    {
+        speedSlider.value(0.1);
+        beamSlider.value(0.06);
+    }
+}
+
+
 function mousePressed()
 {
 
     if(
     mouseX > 0 &&
-    mouseX < 300 &&
+    mouseX < 330 &&
     mouseY > 0 &&
-    mouseY < 100
+    mouseY < 155
 )
 {
     return;
