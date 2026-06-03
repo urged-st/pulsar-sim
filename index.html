@@ -181,6 +181,14 @@ function draw()
             earthX - pulsarX
         );
 
+    let distanceToEarth =
+        dist(
+            pulsarX,
+            pulsarY,
+            earthX,
+            earthY
+        );    
+
     let diff1 =
         abs(
             atan2(
@@ -214,6 +222,17 @@ function draw()
                 (2 * beamWidth * beamWidth)
             )
         );
+
+    let distanceFactor =
+        500 / distanceToEarth;
+
+    distanceFactor = constrain(
+        distanceFactor,
+        0,
+        1
+    );
+    
+    signalStrength *= distanceFactor;
 
     history.push(signalStrength);
 
