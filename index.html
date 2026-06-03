@@ -126,6 +126,11 @@ function draw()
     );
 
     let rotationSpeed = speedSlider.value();
+
+    let frequency = rotationSpeed * 60;
+
+    let period = 1 / frequency;
+
     let beamWidth = beamSlider.value();
 
     let pulsarX = 0;
@@ -317,6 +322,8 @@ function draw()
             20,
             110
         );
+
+        
     }
     else
     {
@@ -328,6 +335,9 @@ function draw()
             110
         );
     }
+
+
+
 
     fill(255);
 
@@ -352,6 +362,21 @@ function draw()
         140
     );
 
+    text(   
+            "period: " +
+            nf(period,1,2) +
+            "s",
+            20,
+            190
+        );
+
+    text(
+            "frequency: " +
+            nf(frequency,1,2) +
+            "Hz",
+            20,
+            165
+        );
     //graph
     let graphX = 20;
     let graphY = height - 200;
