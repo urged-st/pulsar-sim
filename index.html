@@ -23,6 +23,11 @@ canvas{
 
 <script>
 
+
+let pulsecount = 0;
+let previousDetection = 0;
+
+
 let presetSelect;
 
 let pulsarAngle = 0;
@@ -46,6 +51,8 @@ let speedSlider;
 let beamSlider;
 
 let history = [];
+
+let resetButton;
 
 function setup()
 {
@@ -78,6 +85,19 @@ function setup()
         0.15,
         0.01
     );
+
+    speedSlider.input(() => {
+        presetSelect.value("Custom");
+    });
+
+    beamSlider.input(() => {
+        presetSelect.value("Custom");
+    });
+
+    resetButton = createButton("Reset View");
+    resetButton.position(155, 125);
+    resetButton.mousePressed(resetView);
+    
 
     beamSlider.position(20, 55);
 
@@ -231,8 +251,17 @@ function draw()
         0,
         1
     );
-    
+
     signalStrength *= distanceFactor;
+
+    let detected = signalStrength > 0.2;
+
+    if(detected && !previousDetection)
+    {
+        pulsecount++;
+    }
+
+    previousDetection = detected;
 
     history.push(signalStrength);
 
@@ -415,6 +444,22 @@ function draw()
         );
 
     text(
+        "distance: " +
+        nf(distanceToEarth,1,0) +
+        " px",
+        20,
+        240
+    );
+
+
+    text(
+        "pulses detected: " +
+        pulsecount,
+        20,
+        265
+    )
+
+    text(
         "preset: " +
         presetSelect.value(),
         20,
@@ -422,13 +467,58 @@ function draw()
     );
         
     //graph
-    let graphX = 20;
+    let graphX = 40;
     let graphY = height - 200;
     let graphW = 650;
     let graphH = 150;
 
     noFill();
 
+    //gridlines
+    stroke(60);
+    strokeWeight(1);
+
+    //horizontal
+    for(let i = 0; i <= 5; i++)
+    {
+        let y =
+            map(
+                i,
+                0,
+                5,
+                graphY + graphH,
+                graphY
+            );
+
+        line(
+            graphX,
+            y,
+            graphX + graphW,
+            y
+        );
+    }
+
+    //vertical
+    for(let i = 0; i <= 10; i++)
+    {
+        let x =
+            map(
+                i,
+                0,
+                10,
+                graphX,
+                graphX + graphW
+            );
+
+        line(
+            x,
+            graphY,
+            x,
+            graphY + graphH
+        );
+    }
+
+    //border
     stroke(255);
 
     rect(
@@ -438,7 +528,12 @@ function draw()
         graphH
     );
 
+    //waveform
     beginShape();
+
+    stroke(0,255,120);
+    strokeWeight(2);
+    noFill();
 
     for(let i = 0; i < history.length; i++)
     {
@@ -464,6 +559,38 @@ function draw()
     }
 
     endShape();
+
+    noStroke();
+    fill(255);
+
+    text(
+        "received signal strength",
+        graphX,
+        graphY - 10
+    );
+
+    text(
+        "1.0",
+        graphX - 30,
+        graphY + 5
+    );
+
+    text(
+        "0.5",
+        graphX - 30,
+        graphY + graphH / 2 + 5
+    );
+
+    text(
+        "0.0",
+        graphX - 30,
+        graphY + graphH + 5
+    );
+
+    
+
+
+    
 
     noStroke();
 
@@ -511,6 +638,15 @@ function applyPreset()
     }
 }
 
+function resetView()
+    {
+        cameraX = 0;
+        cameraY = 0;
+        zoomLevel = 1;
+
+        earthX = 600;
+        earthY = -150;  
+    }
 
 function mousePressed()
 {
