@@ -24,6 +24,13 @@ canvas{
 <script>
 
 
+
+let showInfo = true;
+let infoButton;
+
+let pulseRate = 0;
+let lastPulseTime = 0;
+
 let pulsecount = 0;
 let previousDetection = 0;
 
@@ -115,6 +122,16 @@ function setup()
 
 
     applyPreset();
+
+
+
+
+    let infoButton = createButton("i");
+    infoButton.position(width -50, 20);
+    
+    infoButton.mousePressed(() => {showInfo = !showInfo;});
+
+
 }
 
 function draw()
@@ -259,6 +276,19 @@ function draw()
     if(detected && !previousDetection)
     {
         pulsecount++;
+
+        let now = millis();
+
+        if (lastPulseTime > 0)
+        {
+            pulseRate = 60000 / (now - lastPulseTime);
+
+
+        }  
+
+        lastPulseTime = now;
+
+
     }
 
     previousDetection = detected;
@@ -460,6 +490,13 @@ function draw()
     )
 
     text(
+        "estimated pulse rate: " +
+        nf(pulseRate,1,1) + "pulses/min",
+        20,
+        290
+    )
+
+    text(
         "preset: " +
         presetSelect.value(),
         20,
@@ -601,6 +638,44 @@ function draw()
         graphX,
         graphY - 10
     );
+
+    if(showInfo)
+    {
+        fill(20,20,20,240);
+        stroke(255);
+
+        rect(
+            width - 325,
+            10,
+            300,
+            250,
+            10
+        );
+
+        noStroke();
+        fill(255);
+
+        textSize(14);
+
+        text(
+            "A pulsar is a rapidly rotating\n" +
+            "neutron star.\n\n" +
+            "Its magnetic axis is tilted\n" +
+            "relative to its rotation axis.\n\n" +
+            "As the beam sweeps across\n" +
+            "Earth, pulses are detected.\n\n" +
+            "Move Earth, adjust spin\n" +
+            "rate and beam width, then\n" +
+            "observe how the signal\n" +
+            "changes.\n\n",
+            width - 305,
+            35
+        );
+
+        
+    }
+
+
 }
 
 function windowResized()
@@ -609,6 +684,9 @@ function windowResized()
         windowWidth,
         windowHeight
     );
+
+
+    infoButton.position(width - 50, 20);
 }
 
 
