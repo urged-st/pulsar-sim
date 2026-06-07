@@ -1,3 +1,14 @@
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,6 +16,8 @@
 <title>Pulsar Simulator</title>
 
 <script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/p5.min.js"></script>
+
+
 
 <style>
 body{
@@ -25,8 +38,12 @@ canvas{
 
 
 
-let showInfo = true;
+let showInfo = true;  //true for debug cause im actually lazy as hell
 let infoButton;
+
+let infoAnimation = 0;
+
+
 
 let pulseRate = 0;
 let lastPulseTime = 0;
@@ -64,7 +81,7 @@ let resetButton;
 function setup()
 {
     createCanvas(windowWidth, windowHeight);
-
+    
     //create stars
     for (let i = 0; i < 20000; i++)
     {
@@ -126,7 +143,19 @@ function setup()
 
 
 
-    let infoButton = createButton("i");
+    infoButton = createButton("?");
+
+    infoButton.style("width", "40px");
+    infoButton.style("height", "40px");
+    infoButton.style("border-radius", "50%");
+    infoButton.style("background", "#111"); 
+    infoButton.style("color", "white");
+    infoButton.style("border", "1px solid #4da3ff");
+    infoButton.style("font-size", "18px");
+    
+    
+
+
     infoButton.position(width -50, 20);
     
     infoButton.mousePressed(() => {showInfo = !showInfo;});
@@ -137,6 +166,36 @@ function setup()
 function draw()
 {
     background(0);
+
+
+
+    if(showInfo)
+    {
+        speedSlider.hide();
+        beamSlider.hide();
+        presetSelect.hide();
+        resetButton.hide();
+    }
+    else
+    {
+        speedSlider.show();
+        beamSlider.show();
+        presetSelect.show();
+        resetButton.show();
+    }
+
+    if(showInfo)
+    {
+        infoAnimation = lerp(infoAnimation, 1, 0.08);
+    }
+
+    else
+    {
+        infoAnimation = lerp(infoAnimation, 0, 0.08);
+    }
+
+
+    
 
     if(draggingView)
     {
@@ -639,43 +698,148 @@ function draw()
         graphY - 10
     );
 
-    if(showInfo)
-    {
-        fill(20,20,20,240);
-        stroke(255);
 
-        rect(
-            width - 325,
-            10,
-            300,
-            250,
-            10
-        );
+
+
+
+    if(infoAnimation > 0.01)
+    {
+        fill(0,200 * infoAnimation);
+        
+
+        noStroke();
+
+        rect(0,0,width,height);
+
+
+         let cardY =
+            lerp(
+                height + 100,
+                height / 2 - 140,
+                infoAnimation
+            );
+
+
+        let middleX = width/2 -150;
+
+        let hoverMiddle =  mouseX > middleX && mouseX < middleX + 300 && mouseY > cardY && mouseY < cardY + 220;
+
+
+
+        
+
+        fill(20);
+        stroke(100,200,255);    
+        
+
+        
+        rect(width / 2 - 500,cardY,300,220,12);
+
+        rect(width / 2 + 200,cardY,300,220,12);
+
+
+        if (hoverMiddle)
+        {
+            stroke(255,220,120)
+            fill(30)
+
+             rect(width / 2 - 150,cardY - 5,300,220,12);
+
+        }
+
+
+        else
+        {
+            fill(20);
+            stroke(100,200,255);
+
+            rect(
+                width / 2 - 150,
+                cardY,
+                300,
+                220,
+                12
+            );
+        }
+
+        
+
+        //rect(width / 2 - 150,cardY,300,220,12);
 
         noStroke();
         fill(255);
 
+        textSize(22);
+
+        text("How To Use",width / 2 - 400,cardY + 30);
+        text("About Pulsars",width / 2 - 67,cardY + 30);
+        text("What it Shows",width / 2 + 280,cardY + 30);
+
         textSize(14);
 
         text(
-            "A pulsar is a rapidly rotating\n" +
-            "neutron star.\n\n" +
-            "Its magnetic axis is tilted\n" +
-            "relative to its rotation axis.\n\n" +
-            "As the beam sweeps across\n" +
-            "Earth, pulses are detected.\n\n" +
-            "Move Earth, adjust spin\n" +
-            "rate and beam width, then\n" +
-            "observe how the signal\n" +
-            "changes.\n\n",
-            width - 305,
-            35
+            "• Drag Earth to change\n" +
+            "  observer position\n\n" +
+
+            "• Drag background to pan\n\n" +
+
+            "• Scroll to zoom\n\n" +
+
+            "• Change spin rate and\n" +
+            "  beam width",
+            width / 2 - 485,
+            cardY + 60
         );
 
+
         
+
+        text(
+        "Neutron star formed after supernova \ncollapse\n\n" +
+        "Mass concentrated into small radius\n" +
+        "Magnetic field channels radiation into \nbeams\n\n" +
+        "Rotation produces periodic observed \npulses",
+        width / 2 - 135, cardY + 60
+        );
+
+
+        text(
+        "Pulsar: rotating neutron star model\n\n" +
+        "Two emission beams from magnetic poles\n" +
+        "Signal depends on alignment with observer\n\n" +
+        "Graph shows received intensity over time\n" +
+        "Pulse rate estimate from detection timing",
+        width / 2 + 215 , cardY + 60
+        );
+
+
+        let titleY =
+            lerp(
+                -50,
+                100,
+                infoAnimation
+            );
+
+        fill(
+            255,
+            255 * infoAnimation
+        );
+        
+        push();
+
+        textAlign(CENTER);
+        textSize(34);
+
+        text(
+            "Pulsar Simulator",
+            width / 2,
+            titleY
+        );
+
+        pop();
+
+
     }
-
-
 }
 
 function windowResized()
