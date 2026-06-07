@@ -1,47 +1,333 @@
-
-
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Pulsar Simulator</title>
-
 <script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/p5.min.js"></script>
-
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-body{
-    margin:0;
-    overflow:hidden;
-    background:black;
-    font-family:Arial,sans-serif;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  overflow: hidden;
+  background: black;
+  font-family: 'Space Mono', monospace;
 }
 
-canvas{
-    display:block;
+canvas { display: block; }
+
+/* Info overlay cause we chill like that */
+#info-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+#info-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#info-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* title */
+#info-title {
+  position: relative;
+  z-index: 2;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 48px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 36px;
+  transform: translateY(-24px);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.22,1,0.36,1) 0.1s,
+              opacity   0.5s ease 0.1s;
+}
+
+#info-overlay.visible #info-title {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* subtitle accent under title */
+#info-title span {
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: #4da3ff;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+/* making a layout cause it was so unorganised  */
+#cards-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  transform: translateY(40px);
+  opacity: 0;
+  transition: transform 0.55s cubic-bezier(0.22,1,0.36,1) 0.2s,
+              opacity   0.55s ease 0.2s;
+}
+
+#info-overlay.visible #cards-row {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.info-card {
+  width: 260px;
+  background: rgba(12, 18, 30, 0.85);
+  border: 1px solid rgba(77, 163, 255, 0.25);
+  border-radius: 16px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(77,163,255,0.6), transparent);
+}
+
+.info-card:hover {
+  border-color: rgba(77, 163, 255, 0.65);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(77,163,255,0.12);
+}
+
+/* accenting cards */
+.card-eyebrow {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #4da3ff;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: #4da3ff;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 18px;
+  line-height: 1.2;
+}
+
+.card-body {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  line-height: 1.85;
+  color: rgba(200, 215, 240, 0.75);
+}
+
+.card-body li {
+  list-style: none;
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.card-body li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: #4da3ff;
+}
+
+/* highlights for el centre card cause he thinks hes special */
+.info-card.highlight {
+  border-color: rgba(255, 200, 80, 0.35);
+  background: rgba(20, 16, 10, 0.90);
+}
+
+.info-card.highlight::before {
+  background: linear-gradient(90deg, transparent, rgba(255,200,80,0.5), transparent);
+}
+
+.info-card.highlight .card-eyebrow { color: #ffc850; }
+.info-card.highlight .card-eyebrow::before { background: #ffc850; }
+
+.info-card.highlight:hover {
+  border-color: rgba(255,200,80,0.7);
+  box-shadow: 0 16px 40px rgba(255,200,80,0.10);
+}
+
+/* dismiss hint */
+#dismiss-hint {
+  position: relative;
+  z-index: 2;
+  margin-top: 32px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s;
+}
+
+#info-overlay.visible #dismiss-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── ? button ───────────────────────────────────────── */
+#info-btn {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 20;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(10,18,32,0.85);
+  border: 1px solid rgba(77,163,255,0.45);
+  color: #4da3ff;
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  backdrop-filter: blur(4px);
+}
+
+#info-btn:hover {
+  background: rgba(77,163,255,0.15);
+  border-color: #4da3ff;
+  transform: scale(1.08);
 }
 </style>
 </head>
 <body>
 
+<!-- ── Info overlay (HTML layer) ──────────────────── -->
+<div id="info-overlay" class="visible">
+  <div id="info-backdrop"></div>
+
+  <div id="info-title">
+    Pulsar Simulator
+    <span></span>
+  </div>
+
+  <div id="cards-row">
+
+    <div class="info-card">
+      <div class="card-eyebrow">01 &nbsp;Controls</div>
+      <div class="card-title">How To Use</div>
+      <div class="card-body">
+        <ul>
+          <li>Drag <em>Earth</em> to reposition the observer</li>
+          <li>Drag the background to pan the view</li>
+          <li>Scroll wheel to zoom in / out</li>
+          <li>Adjust spin rate &amp; beam width with sliders</li>
+          <li>Choose a preset from the dropdown</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-card highlight">
+      <div class="card-eyebrow">02 &nbsp;Science</div>
+      <div class="card-title">About Pulsars</div>
+      <div class="card-body">
+        <ul>
+          <li>Neutron star born from supernova collapse</li>
+          <li>Extreme mass packed into a tiny radius</li>
+          <li>Magnetic field channels radiation into twin beams</li>
+          <li>Rotation sweeps beams across space producing periodic pulses</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-eyebrow">03 &nbsp;Display</div>
+      <div class="card-title">What It Shows</div>
+      <div class="card-body">
+        <ul>
+          <li>Rotating neutron star with two emission beams</li>
+          <li>Signal strength depends on beam-observer alignment</li>
+          <li>Graph shows received intensity over time</li>
+          <li>Pulse rate estimated from detection timing</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="dismiss-hint">Press ? or click anywhere to begin</div>
+</div>
+
+<!-- ── ? toggle button ─────────────────────────────── -->
+<button id="info-btn">?</button>
+
 <script>
+// ── Overlay toggle logic ───────────────────────────
+const overlay  = document.getElementById('info-overlay');
+const infoBtn  = document.getElementById('info-btn');
+let   infoOpen = true;
 
+function toggleInfo() {
+  infoOpen = !infoOpen;
+  overlay.classList.toggle('visible', infoOpen);
+}
 
+infoBtn.addEventListener('click', toggleInfo);
 
-let showInfo = true;  //true for debug cause im actually lazy as hell
-let infoButton;
+overlay.addEventListener('click', e => {
+  // close when clicking backdrop or dismiss hint, not cards
+  if (e.target === overlay || e.target.id === 'info-backdrop' || e.target.id === 'dismiss-hint') {
+    toggleInfo();
+  }
+});
 
-let infoAnimation = 0;
+document.addEventListener('keydown', e => {
+  if (e.key === '?') toggleInfo();
+});
+</script>
+
+<!-- ── p5 sketch ────────────────────────────────────── -->
+<script>
 
 
 
@@ -140,36 +426,20 @@ function setup()
 
     applyPreset();
 
-
-
-
-    infoButton = createButton("?");
-
-    infoButton.style("width", "40px");
-    infoButton.style("height", "40px");
-    infoButton.style("border-radius", "50%");
-    infoButton.style("background", "#111"); 
-    infoButton.style("color", "white");
-    infoButton.style("border", "1px solid #4da3ff");
-    infoButton.style("font-size", "18px");
-    
-    
-
-
-    infoButton.position(width -50, 20);
-    
-    infoButton.mousePressed(() => {showInfo = !showInfo;});
-
-
+    // lock p5 text to Space Mono globally
+    textFont('Space Mono');
 }
 
 function draw()
 {
     background(0);
 
+    // hide p5 controls when info is open
+    const infoOpen =
+        document.getElementById('info-overlay')
+        .classList.contains('visible');
 
-
-    if(showInfo)
+    if(infoOpen)
     {
         speedSlider.hide();
         beamSlider.hide();
@@ -183,19 +453,6 @@ function draw()
         presetSelect.show();
         resetButton.show();
     }
-
-    if(showInfo)
-    {
-        infoAnimation = lerp(infoAnimation, 1, 0.08);
-    }
-
-    else
-    {
-        infoAnimation = lerp(infoAnimation, 0, 0.08);
-    }
-
-
-    
 
     if(draggingView)
     {
@@ -682,164 +939,6 @@ function draw()
         graphX - 30,
         graphY + graphH + 5
     );
-
-    
-
-
-    
-
-    noStroke();
-
-    fill(255);
-
-    text(
-        "received signal strength",
-        graphX,
-        graphY - 10
-    );
-
-
-
-
-
-    if(infoAnimation > 0.01)
-    {
-        fill(0,200 * infoAnimation);
-        
-
-        noStroke();
-
-        rect(0,0,width,height);
-
-
-         let cardY =
-            lerp(
-                height + 100,
-                height / 2 - 140,
-                infoAnimation
-            );
-
-
-        let middleX = width/2 -150;
-
-        let hoverMiddle =  mouseX > middleX && mouseX < middleX + 300 && mouseY > cardY && mouseY < cardY + 220;
-
-
-
-        
-
-        fill(20);
-        stroke(100,200,255);    
-        
-
-        
-        rect(width / 2 - 500,cardY,300,220,12);
-
-        rect(width / 2 + 200,cardY,300,220,12);
-
-
-        if (hoverMiddle)
-        {
-            stroke(255,220,120)
-            fill(30)
-
-             rect(width / 2 - 150,cardY - 5,300,220,12);
-
-        }
-
-
-        else
-        {
-            fill(20);
-            stroke(100,200,255);
-
-            rect(
-                width / 2 - 150,
-                cardY,
-                300,
-                220,
-                12
-            );
-        }
-
-        
-
-        //rect(width / 2 - 150,cardY,300,220,12);
-
-        noStroke();
-        fill(255);
-
-        textSize(22);
-
-        text("How To Use",width / 2 - 400,cardY + 30);
-        text("About Pulsars",width / 2 - 67,cardY + 30);
-        text("What it Shows",width / 2 + 280,cardY + 30);
-
-        textSize(14);
-
-        text(
-            "• Drag Earth to change\n" +
-            "  observer position\n\n" +
-
-            "• Drag background to pan\n\n" +
-
-            "• Scroll to zoom\n\n" +
-
-            "• Change spin rate and\n" +
-            "  beam width",
-            width / 2 - 485,
-            cardY + 60
-        );
-
-
-        
-
-        text(
-        "Neutron star formed after supernova \ncollapse\n\n" +
-        "Mass concentrated into small radius\n" +
-        "Magnetic field channels radiation into \nbeams\n\n" +
-        "Rotation produces periodic observed \npulses",
-        width / 2 - 135, cardY + 60
-        );
-
-
-        text(
-        "Pulsar: rotating neutron star model\n\n" +
-        "Two emission beams from magnetic poles\n" +
-        "Signal depends on alignment with observer\n\n" +
-        "Graph shows received intensity over time\n" +
-        "Pulse rate estimate from detection timing",
-        width / 2 + 215 , cardY + 60
-        );
-
-
-        let titleY =
-            lerp(
-                -50,
-                100,
-                infoAnimation
-            );
-
-        fill(
-            255,
-            255 * infoAnimation
-        );
-        
-        push();
-
-        textAlign(CENTER);
-        textSize(34);
-
-        text(
-            "Pulsar Simulator",
-            width / 2,
-            titleY
-        );
-
-        pop();
-
-
-    }
 }
 
 function windowResized()
@@ -848,9 +947,6 @@ function windowResized()
         windowWidth,
         windowHeight
     );
-
-
-    infoButton.position(width - 50, 20);
 }
 
 
@@ -901,8 +997,12 @@ function mousePressed()
 )
 {
     return;
-}   
+}
 
+    if(document.getElementById('info-overlay').classList.contains('visible'))
+    {
+        return;
+    }
 
     let earthScreenX = 
         width / 2 +
@@ -940,6 +1040,11 @@ function mouseReleased()
 
 function mouseWheel(event)
 {
+    if(document.getElementById('info-overlay').classList.contains('visible'))
+    {
+        return false;
+    }
+
     if(event.delta > 0)
     {
         zoomLevel *= 0.9;
@@ -960,6 +1065,5 @@ function mouseWheel(event)
 }
 
 </script>
-
 </body>
 </html>
