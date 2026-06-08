@@ -3,7 +3,6 @@
 An interactive pulsar visualisation built with JavaScript and p5.js.
 
 This project demonstrates how pulsars emit beams of radiation and how those beams produce periodic signals when they sweep across an observer's line of sight. Users can adjust pulsar properties, move the observer, zoom around the scene, and observe changes in the received signal waveform in real time.
-
 ## Features
 
 - Interactive 2D pulsar visualisation
@@ -73,6 +72,7 @@ Distance attenuation reduces signal intensity as the observer moves farther away
 ## Technologies Used
 
 - HTML5
+- CSS
 - JavaScript
 - p5.js
 
@@ -94,6 +94,9 @@ Planned features include:
 - Multiple observer modes
 - Educational information panels
 
+
+NOTE: These might not be added as I have school to deal with too, but if they are, I will update the site with a messsage notifying users about it.
+
 ## Educational Purpose
 
 This simulator is intended as an educational tool to help visualise:
@@ -104,7 +107,7 @@ This simulator is intended as an educational tool to help visualise:
 - Observer geometry
 - Signal attenuation effects
 
-The model prioritises visual understanding while incorporating simplified physical behaviour.
+The model prioritises visual understanding while incorporating simplified physical behaviour, hence why I didn't purely maximise on astronomical accuracy while building this.
 
 ## License
 
