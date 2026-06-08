@@ -103,7 +103,6 @@ canvas { display: block; }
   border-radius: 16px;
   padding: 28px 24px;
   position: relative;
-  overflow: hidden;
   transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
 
@@ -191,6 +190,135 @@ canvas { display: block; }
   box-shadow: 0 16px 40px rgba(255,200,80,0.10);
 }
 
+
+#about-card {
+  cursor: pointer;
+}
+
+#article-view {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+#article-view.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#cards-row,
+#info-title,
+#dismiss-hint {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#info-overlay.article-open #cards-row,
+#info-overlay.article-open #info-title,
+#info-overlay.article-open #dismiss-hint {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-12px);
+}
+
+#article-inner {
+  width: min(680px, 90vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: rgba(12, 14, 22, 0.95);
+  border: 1px solid rgba(255,200,80,0.25);
+  border-radius: 20px;
+  padding: 48px 52px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,200,80,0.3) transparent;
+}
+
+#article-inner::-webkit-scrollbar { width: 4px; }
+#article-inner::-webkit-scrollbar-thumb { background: rgba(255,200,80,0.3); border-radius: 2px; }
+
+#article-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: rgba(255,200,80,0.6);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 32px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+#article-back:hover { color: #ffc850; }
+
+#article-back::before {
+  content: '←';
+  font-size: 14px;
+}
+
+#article-heading {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+#article-heading-bar {
+  width: 36px;
+  height: 2px;
+  background: #ffc850;
+  border-radius: 2px;
+  margin-bottom: 28px;
+}
+
+#article-body p {
+  font-size: 13px;
+  line-height: 2;
+  color: rgba(200,215,240,0.75);
+  margin-bottom: 18px;
+}
+
+.fun-fact {
+  margin-top: 28px;
+  padding: 16px 20px;
+  border-left: 2px solid #ffc850;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fun-fact-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffc850;
+}
+
+#fun-fact-text {
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(200,215,240,0.65);
+  font-style: italic;
+}
+
+
+
+
 /* dismiss hint */
 #dismiss-hint {
   position: relative;
@@ -267,7 +395,7 @@ canvas { display: block; }
       </div>
     </div>
 
-    <div class="info-card highlight">
+    <div class="info-card highlight", id="about-card">
       <div class="card-eyebrow">02 &nbsp;Science</div>
       <div class="card-title">About Pulsars</div>
       <div class="card-body">
@@ -277,6 +405,9 @@ canvas { display: block; }
           <li>Magnetic field channels radiation into twin beams</li>
           <li>Rotation sweeps beams across space producing periodic pulses</li>
         </ul>
+
+        <p style="margin-top:14px; font-size:10px; color:rgba(255,200,80,0.5); letter-spacing:0.1em; text-transform:uppercase;">Click to read more →</p>
+
       </div>
     </div>
 
@@ -296,6 +427,26 @@ canvas { display: block; }
   </div>
 
   <div id="dismiss-hint">Press ? or click anywhere to begin</div>
+
+  <div id="article-view">
+    <div id="article-inner">
+      <button id="article-back">Back</button>
+      <div id="article-heading">About Pulsars</div>
+      <div id="article-heading-bar"></div>
+      <div id="article-body">
+        <p>When a massive star exhausts its fuel, its core collapses under gravity in milliseconds, releasing more energy than the Sun will emit in its entire lifetime. What remains is a neutron star: roughly 1.4 solar masses compressed into a sphere about 20km across, so dense that a teaspoon of its material would weigh a billion tonnes.</p>
+        <p>Pulsars are neutron stars whose magnetic axis is tilted relative to their rotation axis. This misalignment flings two tight beams of radio waves around like a lighthouse. From Earth, we catch a pulse each time a beam sweeps past, with some arriving with clockwork regularity accurate to nanoseconds, with accuracy that can be compared to atomic clocks!.</p>
+        <p>Millisecond pulsars are thought to be old pulsars recycled by a binary companion, matter from the companion spins them back up to hundreds of rotations per second, like a spinning top given a fresh flick.</p>
+        <p>Despite being remnants of violent stellar death, pulsars are extraordinarily stable. The most precise millisecond pulsars lose less than a microsecond per year, making them some of the most accurate natural clocks in the universe. Astronomers use networks of them as a galactic-scale gravitational wave detector, watching for correlated timing shifts caused by ripples in spacetime passing through the galaxy.</p>
+        <p>The first pulsar was discovered in 1967 by PhD student Jocelyn Bell Burnell, though the Nobel Prize for the discovery was awarded to her supervisor. The signal was so unnervingly regular that her team briefly logged it as LGM-1 (Little Green Men) before the natural explanation became clear.</p>
+        <div class="fun-fact">
+          <span class="fun-fact-label">Fun fact</span>
+          <span id="fun-fact-text"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── ? toggle button ─────────────────────────────── -->
@@ -310,6 +461,7 @@ let   infoOpen = true;
 function toggleInfo() {
   infoOpen = !infoOpen;
   overlay.classList.toggle('visible', infoOpen);
+  if (!infoOpen) closeArticle();
 }
 
 infoBtn.addEventListener('click', toggleInfo);
@@ -323,6 +475,39 @@ overlay.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
   if (e.key === '?') toggleInfo();
+});
+
+const facts = [
+  "The first pulsar was discovered in 1967 by Jocelyn Bell Burnell. The signal was so regular her team jokingly called it LGM-1 — Little Green Men.",
+  "The fastest known pulsar spins 716 times per second — its surface moving at roughly 24% the speed of light.",
+  "Pulsar timing arrays are being used to detect gravitational waves by watching for tiny correlated shifts in pulse arrival times across dozens of pulsars.",
+  "Some pulsars are more accurate timekeepers than the best atomic clocks on Earth.",
+  "The Crab Pulsar, remnant of a supernova seen from Earth in 1054 AD, still pulses 30 times per second and powers the entire Crab Nebula with its energy.",
+];
+
+document.getElementById('fun-fact-text').textContent =
+    facts[Math.floor(Math.random() * facts.length)];
+
+const articleView = document.getElementById('article-view');
+
+function openArticle()
+{
+    overlay.classList.add('article-open');
+    articleView.classList.add('visible');
+}
+
+function closeArticle()
+{
+    overlay.classList.remove('article-open');
+    articleView.classList.remove('visible');
+}
+
+document.getElementById('about-card').addEventListener('click', openArticle);
+
+document.getElementById('article-back').addEventListener('click', e =>
+{
+    e.stopPropagation();
+    closeArticle();
 });
 </script>
 
@@ -1042,7 +1227,7 @@ function mouseWheel(event)
 {
     if(document.getElementById('info-overlay').classList.contains('visible'))
     {
-        return false;
+        return;
     }
 
     if(event.delta > 0)
