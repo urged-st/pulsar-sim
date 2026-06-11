@@ -584,7 +584,7 @@ document.getElementById('article-back').addEventListener('click', e =>
 <!-- p5 sketch  UwU~ -->
 <script>
 
-
+let previousTouchDistance = 0;
 
 let pulseRate = 0;
 let lastPulseTime = 0;
@@ -1244,47 +1244,48 @@ function resetView()
 function mousePressed()
 {
 
-    if(
-    mouseX > 0 &&
-    mouseX < 330 &&
-    mouseY > 0 &&
-    mouseY < 155
-)
-{
-    return;
-}
 
-    if(document.getElementById('info-overlay').classList.contains('visible'))
-    {
-        return;
-    }
+    if(showInfo)
+        {
+            return;
+        }
 
-    let earthScreenX = 
+    let pressX =
+        touches.length > 0 ?
+        touches[0].x :
+        mouseX;
+
+    let pressY =
+        touches.length > 0 ?
+        touches[0].y :
+        mouseY;
+
+    let earthScreenX =
         width / 2 +
         (earthX - cameraX) * zoomLevel;
-    let earthScreenY = 
-        height / 2 + (earthY - cameraY) * zoomLevel;
+
+    let earthScreenY =
+        height / 2 +
+        (earthY - cameraY) * zoomLevel;
 
     if(
         dist(
-            mouseX,
-            mouseY,
+            pressX,
+            pressY,
             earthScreenX,
             earthScreenY
         ) < 20
     )
-
     {
-        draggingEarth = true;}
-    
-
+        draggingEarth = true;
+    }
     else
     {
         draggingView = true;
-    
     }
-    lastMouseX = mouseX;
-    lastMouseY = mouseY;
+
+    lastMouseX = pressX;
+    lastMouseY = pressY;
 }
 
 function mouseReleased()
@@ -1315,6 +1316,90 @@ function mouseWheel(event)
             0.2,
             10
         );
+
+    return false;
+}
+
+
+function touchStarted()
+{
+    mousePressed();
+    return false;
+}
+
+function touchMoved()
+{
+    if(touches.length === 2)
+    {
+        let currentDistance =
+            dist(
+                touches[0].x,
+                touches[0].y,
+                touches[1].x,
+                touches[1].y
+            );
+
+        if(previousTouchDistance > 0)
+        {
+            zoomLevel *=
+                currentDistance /
+                previousTouchDistance;
+
+            zoomLevel =
+                constrain(
+                    zoomLevel,
+                    0.2,
+                    10
+                );
+        }
+
+        previousTouchDistance =
+            currentDistance;
+
+        return false;
+    }
+
+    previousTouchDistance = 0;
+
+    if(touches.length === 1)
+    {
+        let touchX = touches[0].x;
+        let touchY = touches[0].y;
+
+        if(draggingView)
+        {
+            cameraX -=
+                (touchX - lastMouseX) /
+                zoomLevel;
+
+            cameraY -=
+                (touchY - lastMouseY) /
+                zoomLevel;
+        }
+        else if(draggingEarth)
+        {
+            earthX +=
+                (touchX - lastMouseX) /
+                zoomLevel;
+
+            earthY +=
+                (touchY - lastMouseY) /
+                zoomLevel;
+        }
+
+        lastMouseX = touchX;
+        lastMouseY = touchY;
+    }
+
+    return false;
+}
+
+function touchEnded()
+{
+    draggingView = false;
+    draggingEarth = false;
+
+    previousTouchDistance = 0;
 
     return false;
 }
