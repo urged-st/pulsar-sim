@@ -1319,6 +1319,19 @@ function mouseWheel(event)
     return false;
 }
 
+
+function touchStarted()
+{
+    mousePressed();
+    return false;
+}
+
+function touchEnded()
+{
+    mouseReleased();
+    return false;
+}
+
 </script>
 </body>
 </html>
